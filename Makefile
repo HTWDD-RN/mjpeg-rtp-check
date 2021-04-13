@@ -1,4 +1,4 @@
-CFLAGS += -Wall -Wpedantic -ggdb -std=c11
+CFLAGS += -Wall -pedantic -ggdb -std=c11
 INCLUDE += -I include
 SRC = src/check.c \
 	  src/jpeg.c \
@@ -15,8 +15,11 @@ $(EXE): $(OBJ)
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDE) -c $*.c -o $*.o
 
+libjpeg_cap: src/libjpeg_cap.c
+	$(CC) $(CFLAGS) -o $@ $^ `pkg-config --libs libjpeg`
+
 clean:
-	rm -f mj_check $(OBJ)
+	rm -f mj_check $(OBJ) libjpeg_cap
 
 .PHONY: mj_check clean
 
