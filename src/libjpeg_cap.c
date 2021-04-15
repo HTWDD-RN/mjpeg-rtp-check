@@ -17,22 +17,14 @@ void process_jpeg(FILE** in) {
 
     // set parameters for decompression
 
-    (void) jpeg_start_decompress(&cinfo);
-    // now correct scaled output image dimensions available
-    // also output colormap available
-
+    // The following parameters are set by jpeg_read_header().
     printf("width: %u, height: %u\n", cinfo.image_width, cinfo.image_height);
     printf("#components: %d\n", cinfo.num_components);
     printf("YCbCr?: %u\n", cinfo.jpeg_color_space == JCS_YCbCr);
-    if (cinfo.saw_JFIF_marker) {
-        printf("square pixels?: %u\n", cinfo.X_density == cinfo.Y_density);
-    }
-    /*
-    printf("max_h_samp_factor: %d\n", cinfo.max_h_samp_factor);
-    printf("max_v_samp_factor: %d\n", cinfo.max_v_samp_factor);
-    printf("min_DCT_h_scaled_size: %d\n", cinfo.min_DCT_h_scaled_size);
-    printf("min_DCT_v_scaled_size: %d\n", cinfo.min_DCT_v_scaled_size);
-    */
+
+    (void) jpeg_start_decompress(&cinfo);
+    // now correct scaled output image dimensions available
+    // also output colormap available
 
     row_stride = cinfo.output_width * cinfo.output_components;
     buffer = (*cinfo.mem->alloc_sarray)
@@ -44,12 +36,57 @@ void process_jpeg(FILE** in) {
         // process some scan or frame specific data
     }
 
-    if (cinfo.quant_tbl_ptrs) {
-        printf("quant_tbl = 8bit?: %u\n", cinfo.quant_tbl_ptrs[0]->quantval[0] < 0xff);
+    // state variables: indicate progress
+    printf("SOSs: %d\n", cinfo.input_scan_number);
+
+    // internal jpeg parameters, could change between scans
+    size_t quant_tbls = 0;
+    for (size_t i = 0; i < NUM_QUANT_TBLS; ++i) {
+        if (cinfo.quant_tbl_ptrs[i]) {
+            quant_tbls++;
+        }
     }
+    printf("quant_tbls: %zu\n", quant_tbls);
+
+    size_t huff_tbls = 0;
+    for (size_t i = 0; i < NUM_HUFF_TBLS; ++i) {
+        if (cinfo.dc_huff_tbl_ptrs[i] && cinfo.ac_huff_tbl_ptrs[i]) {
+            huff_tbls++;
+        }
+    }
+    printf("huff_tbls: %zu\n", huff_tbls);
+    // JHUFF_TBL* {d,a}c_huff_tbl_ptrs[NUM_HUFF_TBLS];
+
+    // given by SOF/SOS markers, reset by SOI
     printf("prec: %d\n", cinfo.data_precision);
-    printf("baseline?: %u, huffman?: %u\n", cinfo.is_baseline, !cinfo.arith_code);
+    printf("baseline?: %u\n", cinfo.is_baseline);
+    /* If cinfo.progressive_mode == FALSE and cinfo.arith_code == FALSE
+     * the encountered SOF marker is SOF0 or SOF1 (baseline or extended).
+     * Together with some other information baseline mode can be verified.
+     * The cinfo.is_baseline value just gets set to true in jpeg_write_header()
+     * which is never called in the decoding process. So even if we can
+     * access it (which means JPEG_LIB_VERSION >= 80), we cannot obtain information
+     * from it.
+     *
+     * baseline:
+     * prec: 8bit
+     * sequential (!progressive_mode)
+     * huffman coding: 2ac 2dc tables
+     */
     printf("progressive?: %u\n", cinfo.progressive_mode);
+    printf("huffman?: %u\n", !cinfo.arith_code);
+    printf("DRIs: %u\n", cinfo.restart_interval);
+    if (cinfo.comp_info) {
+        for (size_t i = 0; i < cinfo.num_components; ++i) {
+            printf("c%zu: h: %d, v: %d\n", i,
+                    cinfo.comp_info[i].h_samp_factor,
+                    cinfo.comp_info[i].v_samp_factor);
+        }
+    }
+
+    /* valid during any one scan */
+    /* when using num_components and comp_info, it could be counted to the prev section */
+    /*
     if (cinfo.cur_comp_info) {
         for (size_t i = 0; i < cinfo.comps_in_scan; ++i) {
             printf("c%zu: h: %d, v: %d\n", i,
@@ -57,8 +94,12 @@ void process_jpeg(FILE** in) {
                     cinfo.cur_comp_info[i]->v_samp_factor);
         }
     }
-    printf("SOSs: %d\n", cinfo.input_scan_number);
-    printf("DRIs: %u\n", cinfo.restart_interval);
+    */
+
+    // optional markers
+    if (cinfo.saw_JFIF_marker) {
+        printf("square pixels?: %u\n", cinfo.X_density == cinfo.Y_density);
+    }
 
     (void) jpeg_finish_decompress(&cinfo);
 
