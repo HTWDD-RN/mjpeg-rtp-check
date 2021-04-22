@@ -18,8 +18,15 @@ $(EXE): $(OBJ)
 libjpeg_cap: src/libjpeg_cap.c
 	$(CC) $(CFLAGS) -o $@ $^ `pkg-config --libs libjpeg`
 
+bin/JpegAnalysis.class: src/JpegAnalysis.java
+	mkdir -p $(@D)
+	javac -cp src/ -d $(@D) $^
+
+JpegAnalysis: bin/JpegAnalysis.class
+	java -cp $(<D) $@ ../data/videos/htw_cut.mjpeg
+
 clean:
-	rm -f mj_check $(OBJ) libjpeg_cap
+	rm -rf mj_check $(OBJ) libjpeg_cap bin
 
 .PHONY: mj_check clean
 
