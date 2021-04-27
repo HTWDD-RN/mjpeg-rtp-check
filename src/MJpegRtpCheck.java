@@ -52,14 +52,15 @@ public class MJpegRtpCheck {
             return false;
         }
 
-        JpegRtpMetadata jrm_result = new JpegRtpMetadata();
+        // JpegRtpMetadata jrm_result = new JpegRtpMetadata();
         byte[] data = null;
-        while (in.seekToSoi()) {
-            data = in.nextJpeg();
-            JpegRtpMetadata jrm = JpegMetadataExtractor.extractMetadata(data);
-            // compare with jrm_result (previous result(s))
-            frameCount++;
-        }
+        // while (in.seekToSoi()) {
+        data = in.nextJpeg();
+        JpegRtpMetadata jrm = JpegMetadataExtractor.extractMetadata(data);
+        // compare with jrm_result (previous result(s))
+        jrm.checkRtp2435Conformance();
+        frameCount++;
+        // }
 
         in.close();
         return false;
