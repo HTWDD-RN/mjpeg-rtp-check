@@ -1,41 +1,21 @@
-CFLAGS += -Wall -pedantic -ggdb -std=c11
-INCLUDE += -I include
 SRCDIR = src
 BINDIR = bin
-SRC = $(SRCDIR)/check.c \
-	  $(SRCDIR)/jpeg.c \
-	  $(SRCDIR)/mjrtp_check.c
-OBJ = $(SRC:.c=.o)
+CLASS = $(BINDIR)/MJpegRtpCheck.class \
+	    $(BINDIR)/JpegValidator.class \
+	    $(BINDIR)/JpegRtpMetadata.class
 
-EXE = mj_check
 
-all: $(EXE)
+all: MJpegRtpCheck.jar
 
-$(EXE): $(OBJ)
-	$(CC) $(LDFLAGS) -o $@ $^
-
-%.o: %.c
-	$(CC) $(CFLAGS) $(INCLUDE) -c $*.c -o $*.o
-
-libjpeg_cap: $(SRCDIR)/libjpeg_cap.c
-	$(CC) $(CFLAGS) -o $@ $^ `pkg-config --libs libjpeg`
-
-$(BINDIR)/JpegAnalysis.class: $(SRCDIR)/JpegAnalysis.java
+$(BINDIR)/%.class: $(SRCDIR)/%.java
 	mkdir -p $(@D)
-	javac -cp $(SRCDIR)/ -d $(@D) $^
+	javac -cp $(<D) -d $(@D) $^
 
-JpegAnalysis: $(BINDIR)/JpegAnalysis.class
-	java -cp $(<D) $@ ../data/videos/htw_cut.mjpeg
-
-$(BINDIR)/MJpegRtpCheck.class: $(SRCDIR)/MJpegRtpCheck.java
-	mkdir -p $(@D)
-	javac -cp $(SRCDIR)/ -d $(@D) $^
-
-# JpegAnalysis: $(BINDIR)/MJpegRtpCheck.class
-# 	java -cp $(<D) $@ ../data/videos/htw_cut.mjpeg
+MJpegRtpCheck.jar: $(CLASS)
+	jar -c -f $(BINDIR)/$@  $^
 
 clean:
-	rm -rf mj_check $(OBJ) libjpeg_cap bin
+	rm -rf $(CLASS) $(BINDIR)/MJpegRtpCheck.jar
 
-.PHONY: mj_check clean
+.PHONY: clean MJpegRtpCheck.jar
 
