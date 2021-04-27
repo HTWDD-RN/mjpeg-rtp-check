@@ -63,7 +63,7 @@ public class VideoFileBuffer {
             return null;
         }
 
-        byte[] data = null;
+        byte[] data = new byte[0];
         int eoiPos = -1;
 
         do {
