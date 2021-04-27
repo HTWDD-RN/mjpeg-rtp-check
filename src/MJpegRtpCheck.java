@@ -56,7 +56,7 @@ public class MJpegRtpCheck {
         byte[] data = null;
         while (in.seekToSoi()) {
             data = in.nextJpeg();
-            JpegRtpMetadata jrm = JpegValidator.validateRtp(data);
+            JpegRtpMetadata jrm = JpegMetadataExtractor.extractMetadata(data);
             // compare with jrm_result (previous result(s))
             frameCount++;
         }
