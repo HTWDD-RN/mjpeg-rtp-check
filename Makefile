@@ -2,7 +2,8 @@ SRCDIR = src
 BINDIR = bin
 CLASS = $(BINDIR)/MJpegRtpCheck.class \
 	    $(BINDIR)/JpegValidator.class \
-	    $(BINDIR)/JpegRtpMetadata.class
+	    $(BINDIR)/JpegRtpMetadata.class \
+	    $(BINDIR)/VideoFileBuffer.class
 
 
 all: MJpegRtpCheck.jar

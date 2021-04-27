@@ -1,7 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 
 // import java.util.Arrays;
 
@@ -45,45 +44,29 @@ public class MJpegRtpCheck {
 
         // examine format specific file data (e.g. mov)
 
-        // read in data
-        RandomAccessFile in = null;
+        VideoFileBuffer in = null;
         try {
-            in = new RandomAccessFile(filename, "r");
+            in = new VideoFileBuffer(filename);
         } catch (FileNotFoundException e) {
             System.out.println(e);
             return false;
         }
+
         JpegRtpMetadata jrm_result = new JpegRtpMetadata();
         byte[] data = null;
-        while (seekToSoi(in, data)) {
+        while (in.seekToSoi()) {
+            data = in.nextJpeg();
             JpegRtpMetadata jrm = JpegValidator.validateRtp(data);
             // compare with jrm_result (previous result(s))
             frameCount++;
         }
 
-        try {
-            in.close();
-        } catch (IOException e) {
-            System.out.println(e);
-        }
+        in.close();
         return false;
     }
 
     private void printError(String errorMessage) {
         System.out.println("Error: " + errorMessage);
-    }
-
-    private boolean seekToSoi(RandomAccessFile in, byte[] data) {
-        // read file into dataBuffer
-        // search for soi and eoi
-        // data = new byte[required_size];
-        // write jpeg to data
-        // write remaining read data to dataBuffer (without offset)
-        // return true, if successful
-
-        // long currentOffset = in.getFilePointer();
-        // void in.seek(offset); // starting from file start
-        return false;
     }
 
     public static void main(String[] args) {
