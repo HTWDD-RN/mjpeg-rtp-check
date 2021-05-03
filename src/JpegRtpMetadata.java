@@ -119,7 +119,52 @@ class JpegRtpMetadata {
         return conformant;
     }
 
-    private static void printTestResult(boolean passed, String info) {
+    public boolean isEqual(JpegRtpMetadata jrm) {
+        boolean equal = true;
+
+        if (baseline != jrm.baseline) {
+            equal = false;
+        }
+        if (huffman != jrm.huffman) {
+            equal = false;
+        }
+        if (numSOS != jrm.numSOS) {
+            equal = false;
+        }
+        if (width != jrm.width) {
+            equal = false;
+        }
+        if (height != jrm.height) {
+            equal = false;
+        }
+        if (samplePrecision != jrm.samplePrecision) {
+            equal = false;
+        }
+        if (pixelAspectRatio != jrm.pixelAspectRatio) {
+            equal = false;
+        }
+        if (numFrameComponents != jrm.numFrameComponents) {
+            equal = false;
+        }
+        if (numDQT != jrm.numDQT) {
+            equal = false;
+        }
+        if (numDHT != jrm.numDHT) {
+            equal = false;
+        }
+
+        // todo: content of huffman tables
+
+        if (subsampling[0][0] != jrm.subsampling[0][0]
+                || subsampling[0][1] != jrm.subsampling[0][1]
+                || subsampling[0][2] != jrm.subsampling[0][2]) {
+            equal = false;
+        }
+
+        return equal;
+    }
+
+    public static void printTestResult(boolean passed, String info) {
         String out = "";
         if (passed) {
             out += ANSI_ESCAPE_GREEN;

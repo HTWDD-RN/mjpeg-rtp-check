@@ -56,16 +56,30 @@ public class MJpegRtpCheck {
             return false;
         }
 
-        // JpegRtpMetadata jrm_result = new JpegRtpMetadata();
         byte[] data = null;
-        // peek
-        // while (in.seekToSoi()) {
+        in.seekToSoi();
         data = in.nextJpeg();
         JpegRtpMetadata jrm = JpegMetadataExtractor.extractMetadata(data);
-        // compare with jrm_result (previous result(s))
-        jrm.checkRtp2435Conformance();
         frameCount++;
-        // }
+
+        boolean shareMetadata = true;
+        while (fullParse && in.seekToSoi()) {
+            data = in.nextJpeg();
+            JpegRtpMetadata jrm_new = JpegMetadataExtractor.extractMetadata(data);
+            boolean equal = jrm.isEqual(jrm_new);
+            frameCount++;
+            if (!equal) {
+                JpegRtpMetadata.printTestResult(equal, "Frame " + frameCount + " shares metadata");
+                shareMetadata = false;
+            }
+        }
+        if (fullParse) {
+            System.out.println("====================================");
+            JpegRtpMetadata.printTestResult(shareMetadata, "All frames share metadata");
+            System.out.println();
+        }
+
+        jrm.checkRtp2435Conformance();
 
         in.close();
         return false;
