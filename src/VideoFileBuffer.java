@@ -75,22 +75,17 @@ public class VideoFileBuffer {
                     }
                 }
             }
-            if (eof) {
-                break;
-            }
             if (eoiPos == -1) {
                 byte[] newData = new byte[data.length + bufferOffset];
                 System.arraycopy(data, 0, newData, 0, data.length);
                 System.arraycopy(buffer, 0, newData, data.length, bufferOffset);
                 data = newData;
                 bufferOffset = 0;
-                fillBuffer();
+                if (!fillBuffer()) {
+                    break;
+                }
             }
         } while (eoiPos == -1);
-
-        if (eof) {
-            return null;
-        }
 
         if (eoiPos == -1) {
             return null;
