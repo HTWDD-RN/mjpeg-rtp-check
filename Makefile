@@ -1,6 +1,7 @@
 SRCDIR = src
 BINDIR = bin
 CLASS = $(BINDIR)/MJpegRtpCheck.class \
+	    $(BINDIR)/ArgumentParser.class \
 	    $(BINDIR)/JpegMetadataExtractor.class \
 	    $(BINDIR)/JpegRtpMetadata.class \
 	    $(BINDIR)/VideoFileBuffer.class

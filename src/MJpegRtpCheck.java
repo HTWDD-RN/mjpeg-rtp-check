@@ -11,13 +11,16 @@ import java.io.IOException;
  * @author Emanuel Günther (s76954)
  */
 public class MJpegRtpCheck {
+    public static final String VERSION = "0.1.0";
+
     private String filename;
     private String fileExtension;
+    private boolean fullParse;
     private int frameCount;
     private byte[] dataBuffer;
 
 
-    public MJpegRtpCheck(String filename) {
+    public MJpegRtpCheck(String filename, boolean fullParse) {
         this.filename = filename;
         if (filename.endsWith(".mjpeg") || filename.endsWith(".mjpg")) {
             this.fileExtension = "mjpeg";
@@ -28,6 +31,7 @@ public class MJpegRtpCheck {
         } else {
             this.fileExtension = "invalid";
         }
+        this.fullParse = fullParse;
         frameCount = 0;
     }
 
@@ -54,6 +58,7 @@ public class MJpegRtpCheck {
 
         // JpegRtpMetadata jrm_result = new JpegRtpMetadata();
         byte[] data = null;
+        // peek
         // while (in.seekToSoi()) {
         data = in.nextJpeg();
         JpegRtpMetadata jrm = JpegMetadataExtractor.extractMetadata(data);
@@ -71,12 +76,14 @@ public class MJpegRtpCheck {
     }
 
     public static void main(String[] args) {
-        if (args.length != 1) {
-            System.out.println("Usage: MJpegRtpCheck <file>");
-            return;
-        }
+        ArgumentParser argparse = new ArgumentParser("MJpegRtpCheck", MJpegRtpCheck.VERSION);
+        argparse.registerArgument("file");
+        argparse.registerOption("f", "full-parse", "parse all images of the file, not just one");
+        argparse.parse(args);
 
-        MJpegRtpCheck mjrc = new MJpegRtpCheck(args[0]);
+        String file = argparse.getString("file");
+        boolean fullParse = argparse.getBoolean("full-parse");
+        MJpegRtpCheck mjrc = new MJpegRtpCheck(file, fullParse);
         mjrc.run();
     }
 }

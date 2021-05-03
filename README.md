@@ -26,3 +26,7 @@ The maximum amount of data in the RTP packets cannot be exactly checked because 
 A lot of the other content of RFC 2435 deals with the format which is used to store the JPEG data in the RTP packet.
 These restrictions cannot be checked by this program.
 
+## Requirements
+
+The program requres at least JRE 11.
+
