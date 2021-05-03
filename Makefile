@@ -5,6 +5,7 @@ CLASS = $(BINDIR)/MJpegRtpCheck.class \
 	    $(BINDIR)/JpegMetadataExtractor.class \
 	    $(BINDIR)/JpegRtpMetadata.class \
 	    $(BINDIR)/VideoFileBuffer.class
+JARFILES = $(CLASS:$(BINDIR)/%=%)
 
 
 all: MJpegRtpCheck.jar
@@ -14,10 +15,10 @@ $(BINDIR)/%.class: $(SRCDIR)/%.java
 	javac -cp $(<D) -d $(@D) $^
 
 MJpegRtpCheck.jar: $(CLASS)
-	jar -c -f $(BINDIR)/$@  $^
+	cd $(BINDIR); jar -c -f $@ -e MJpegRtpCheck $(JARFILES)
 
 clean:
-	rm -rf $(CLASS) $(BINDIR)/MJpegRtpCheck.jar
+	rm -rf $(BINDIR)
 
 .PHONY: clean MJpegRtpCheck.jar
 
