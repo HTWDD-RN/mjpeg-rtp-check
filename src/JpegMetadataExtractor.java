@@ -49,7 +49,61 @@ public class JpegMetadataExtractor {
             }
         }
 
+        extractHuffmanTables(jrm, data);
+
         return jrm;
+    }
+
+    private static void extractHuffmanTables(JpegRtpMetadata jrm, byte[] data) {
+        int idx = 1;
+        while (idx < data.length) {
+            if (data[idx-1] == VideoFileBuffer.JPEG_MARKER && data[idx] == VideoFileBuffer.JPEG_DHT) {
+                idx++; // point to length
+
+                /*
+                 * The bytes need to be masked because of the implicit promotion to type (signed) int.
+                 * The promotion does sign-extension rather than zero-extension and that is why the
+                 * masking is needed.
+                 */
+                int length = (data[idx] & 0xFF) << 8 | (data[idx+1] & 0xFF);
+                idx += 2;
+                length -= 2; // exclude length parameter itself
+
+                int tmpIdx = idx;
+                do {
+                    int tc = (data[tmpIdx] & 0xF0) >> 4; // table class
+                    int th = (data[tmpIdx] & 0x0F); // huffman destination id
+                    tmpIdx++;
+
+                    int numEntries = 0;
+                    for (int i = 0; i < 16; i++) { // there are 16 entries
+                        numEntries += data[tmpIdx+i];
+                    }
+
+                    byte[] tbl = Arrays.copyOfRange(data, tmpIdx, tmpIdx + 16 + numEntries);
+                    if (tc == 0) { // DC
+                        if (th == 0) { // lum according to RFC 2435
+                            jrm.huffmanLumDc = tbl;
+                        } else if (th == 1) { // chr according to RFC 2435
+                            jrm.huffmanChmDc = tbl;
+                        }
+                        // else is not supported
+                    } else if (tc == 1) { // AC
+                        if (th == 0) { // lum according to RFC 2435
+                            jrm.huffmanLumAc = tbl;
+                        } else if (th == 1) { // chr according to RFC 2435
+                            jrm.huffmanChmAc = tbl;
+                        }
+                        // else is not supported
+                    }
+                    // else is not supported
+
+                    tmpIdx += 16 + numEntries;
+                } while (tmpIdx - idx < length);
+                idx = tmpIdx;
+            }
+            idx++; // ??
+        }
     }
 
     private static void parseDht(Node node, JpegRtpMetadata jrm) {

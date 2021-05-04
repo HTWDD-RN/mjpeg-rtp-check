@@ -21,12 +21,8 @@ public class VideoFileBuffer {
     public static final byte JPEG_MARKER = (byte)0xFF;
     public static final byte JPEG_SOI = (byte)0xD8;
     public static final byte JPEG_EOI = (byte)0xD9;
+    public static final byte JPEG_DHT = (byte)0xC4;
 
-    /*
-    public static final byte JPEG_SOS = 0xDA;
-    public static final byte JPEG_DQT = 0x;
-    public static final byte JPEG_DHT = 0x;
-    */
 
     /**
      * Create a VideoFileBuffer for reading image data and video meta data
