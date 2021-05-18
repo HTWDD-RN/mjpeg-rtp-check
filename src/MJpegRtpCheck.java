@@ -60,12 +60,18 @@ public class MJpegRtpCheck {
         in.seekToSoi();
         data = in.nextJpeg();
         JpegRtpMetadata jrm = JpegMetadataExtractor.extractMetadata(data);
+        if (jrm == null) {
+            return false;
+        }
         frameCount++;
 
         boolean shareMetadata = true;
         while (fullParse && in.seekToSoi()) {
             data = in.nextJpeg();
             JpegRtpMetadata jrm_new = JpegMetadataExtractor.extractMetadata(data);
+            if (jrm_new == null) {
+                return false;
+            }
             boolean equal = jrm.isEqual(jrm_new);
             frameCount++;
             if (!equal) {

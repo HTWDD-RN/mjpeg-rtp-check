@@ -23,6 +23,15 @@ public class JpegMetadataExtractor {
     private JpegMetadataExtractor() {
     }
 
+    /**
+     * Extract metadata from an JPEG image.
+     *
+     * Just metadata required for checking RFC 2435 conformance will be extracted
+     * (by now).
+     *
+     * @param data JPEG image
+     * @return metadata structure if successful, null in case of an error
+     */
     public static JpegRtpMetadata extractMetadata(byte[] data) {
         JpegRtpMetadata jrm = new JpegRtpMetadata();
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
@@ -36,6 +45,7 @@ public class JpegMetadataExtractor {
                 md = ir.getImageMetadata(0);
             } catch (IOException e) {
                 System.out.println(e);
+                return null;
             }
             String[] names = md.getMetadataFormatNames();
             for (String name : names) {
