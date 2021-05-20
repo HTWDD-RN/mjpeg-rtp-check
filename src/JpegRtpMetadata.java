@@ -257,6 +257,30 @@ class JpegRtpMetadata {
         return equal;
     }
 
+    public void printMetadata() {
+        String out = "";
+
+        out += "Baseline DCT sequential: " + baseline + "\n";
+        out += "Huffman entropy coding: " + huffman + "\n";
+        out += "Number of SOS segments: " + numSOS + "\n";
+        boolean isInterleaved = numSOS == 1 && numFrameComponents > 1;
+        out += "interleaved: " + isInterleaved + "\n";
+        out += "width: " + width + " px" + "\n";
+        out += "height: " + height + " px" + "\n";
+        out += "sampe precision: " + samplePrecision + " bit" + "\n";
+        out += "pixel aspect ratio: " + pixelAspectRatio + "\n";
+        out += "number of components in frame: " + numFrameComponents + "\n";
+        out += "number of quantization tables: " + numDQT + "\n";
+        out += "number of huffman tables: " + numDHT + "\n";
+        // values of huffman tables
+        // (huffmanLumDc | huffmanLumAc | huffmanChmDc | huffmanChmAc)
+        out += "subsampling: " + subsampling[0][0] + ":"
+                               + subsampling[0][1] + ":"
+                               + subsampling[0][2];
+
+        System.out.println(out);
+    }
+
     public static void printTestResult(boolean passed, String info) {
         String out = "";
         if (passed) {

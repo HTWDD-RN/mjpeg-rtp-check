@@ -16,11 +16,12 @@ public class MJpegRtpCheck {
     private String filename;
     private String fileExtension;
     private boolean fullParse;
+    private boolean rfc2435Compliance;
     private int frameCount;
     private byte[] dataBuffer;
 
 
-    public MJpegRtpCheck(String filename, boolean fullParse) {
+    public MJpegRtpCheck(String filename, boolean fullParse, boolean rfc2435Compliance) {
         this.filename = filename;
         if (filename.endsWith(".mjpeg") || filename.endsWith(".mjpg")) {
             this.fileExtension = "mjpeg";
@@ -32,6 +33,7 @@ public class MJpegRtpCheck {
             this.fileExtension = "invalid";
         }
         this.fullParse = fullParse;
+        this.rfc2435Compliance = rfc2435Compliance;
         frameCount = 0;
     }
 
@@ -85,7 +87,11 @@ public class MJpegRtpCheck {
             System.out.println();
         }
 
-        jrm.checkRtp2435Conformance();
+        if (rfc2435Compliance) {
+            jrm.checkRtp2435Conformance();
+        } else {
+            jrm.printMetadata();
+        }
 
         in.close();
         return false;
@@ -98,12 +104,14 @@ public class MJpegRtpCheck {
     public static void main(String[] args) {
         ArgumentParser argparse = new ArgumentParser("MJpegRtpCheck", MJpegRtpCheck.VERSION);
         argparse.registerArgument("file");
+        argparse.registerOption("c", "compliance", "check for compliance with RFC 2435");
         argparse.registerOption("f", "full-parse", "parse all images of the file, not just one");
         argparse.parse(args);
 
         String file = argparse.getString("file");
         boolean fullParse = argparse.getBoolean("full-parse");
-        MJpegRtpCheck mjrc = new MJpegRtpCheck(file, fullParse);
+        boolean compliance = argparse.getBoolean("compliance");
+        MJpegRtpCheck mjrc = new MJpegRtpCheck(file, fullParse, compliance);
         mjrc.run();
     }
 }
