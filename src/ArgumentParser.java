@@ -1,3 +1,4 @@
+import java.lang.Character;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NoSuchElementException;
@@ -75,27 +76,43 @@ public class ArgumentParser {
         int argIdx = 0;
         for (String s : args) {
             String opt = "";
-            if (s.startsWith("-")) {
-                opt = s.substring(1);
-            }
+            boolean shortOpt = false;
+            boolean longOpt = false;
             if (s.startsWith("--")) {
                 opt = s.substring(2);
+                longOpt = true;
+            } else if (s.startsWith("-")) {
+                opt = s.substring(1);
+                shortOpt = true;
             }
-            if (!opt.isEmpty()) {
-                if (options.get(opt) != null) {
-                    String putOpt = opt;
-                    String stlOpt = shortToLong.get(opt);
-                    if (stlOpt != null) {
-                        putOpt = stlOpt;
+            if (shortOpt || longOpt) {
+                int idx = 0;
+                do {
+                    String currOpt = opt;
+                    if (shortOpt) {
+                        currOpt = Character.toString(currOpt.charAt(idx++));
                     }
-                    parsed.put(putOpt, true);
+                    if (!currOpt.isEmpty() && options.get(currOpt) != null) {
+                        String putOpt = currOpt;
+                        String stlOpt = shortToLong.get(currOpt);
+                        if (stlOpt != null) {
+                            putOpt = stlOpt;
+                        }
+                        parsed.put(putOpt, true);
+                    } else {
+                        System.out.println("Option was not recognized: " + currOpt);
+                        usage();
+                        System.exit(1);
+                    }
+                } while (shortOpt && idx < opt.length());
+            } else {
+                if (argIdx < arguments.size()) {
+                    parsed.put(arguments.get(argIdx++), s);
                 } else {
-                    System.out.println("Option was not recognized: " + opt);
+                    System.out.println("Too many arguments: " + s);
                     usage();
                     System.exit(1);
                 }
-            } else {
-                parsed.put(arguments.get(argIdx++), s);
             }
         }
 
