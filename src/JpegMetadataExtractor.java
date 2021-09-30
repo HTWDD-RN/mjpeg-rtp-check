@@ -193,10 +193,16 @@ public class JpegMetadataExtractor {
 
         byte[][] samplFact = new byte[3][2]; // three components, horizontal and vertical
         NodeList list = node.getChildNodes();
+        boolean applyDecrement = false;
         for (int i = 0; i < list.getLength(); i++) {
             NamedNodeMap compSpecs = list.item(i).getAttributes();
             int id = Integer.parseInt(compSpecs.getNamedItem("componentId").getNodeValue());
-            id--;
+            if (i == 0) {
+                applyDecrement = id >= 1;
+            }
+            if (applyDecrement) {
+                id--;
+            }
             samplFact[id][0] = (byte)Integer.parseInt(compSpecs.getNamedItem("HsamplingFactor").getNodeValue());
             samplFact[id][1] = (byte)Integer.parseInt(compSpecs.getNamedItem("VsamplingFactor").getNodeValue());
         }
